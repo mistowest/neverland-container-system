@@ -116,7 +116,6 @@ Os dados **não se perdem** em restarts ou rebuilds normais. Só são apagados c
 
 ## Recursos
 
-- `USAGE.md` — guia detalhado do ambiente Python OSINT
 - `docker-compose.yml` — definição do serviço
 - `Dockerfile` — imagem Ubuntu customizada
 - `.env.example` — template de configuração
