@@ -1,10 +1,13 @@
 FROM ubuntu:24.04
-
 ENV DEBIAN_FRONTEND=noninteractive
 
 ARG SYSTEM_USER=mrwest
 ARG SYSTEM_PASSWORD=changeme
 ARG SYSTEM_HOSTNAME=neverland
+# ---- Opcionais: defina no .env para espelhar o UID/GID do host (fix bind mount em ./data) ----
+# Necessário em Linux. No Windows (Docker Desktop) não é preciso.
+ARG SYSTEM_UID=
+ARG SYSTEM_GID=
 
 RUN echo "${SYSTEM_HOSTNAME}" > /etc/hostname
 
@@ -54,13 +57,16 @@ RUN apt-get update && apt-get install -y default-jdk && rm -rf /var/lib/apt/list
 RUN apt-get update && apt-get install -y ruby-full && rm -rf /var/lib/apt/lists/*
 RUN apt-get update && apt-get install -y php php-cli && rm -rf /var/lib/apt/lists/*
 
-# ---- Cria usuário do sistema (via .env) ----
-RUN useradd -m -s /bin/bash ${SYSTEM_USER} && \
+# ---- Cria usuário ----
+# Se SYSTEM_UID/SYSTEM_GID estiverem definidos, o usuário será criado com o mesmo
+# UID/GID do host — necessário para escrita no bind mount de ./data em Linux.
+# Se não estiverem definidos, o Docker escolhe os IDs automaticamente.
+RUN groupadd ${SYSTEM_GID:+-g $SYSTEM_GID} ${SYSTEM_USER} && \
+    useradd -m -s /bin/bash ${SYSTEM_UID:+-u $SYSTEM_UID} -g ${SYSTEM_USER} ${SYSTEM_USER} && \
     echo "${SYSTEM_USER}:${SYSTEM_PASSWORD}" | chpasswd && \
     usermod -aG sudo ${SYSTEM_USER}
 
 ENV PATH="/usr/local/go/bin:/usr/local/cargo/bin:/home/${SYSTEM_USER}/.local/bin:/root/.local/bin:${PATH}"
-
 RUN echo 'export PATH="/usr/local/go/bin:/usr/local/cargo/bin:/home/'"${SYSTEM_USER}"'/.local/bin:$PATH"' >> /home/${SYSTEM_USER}/.bashrc
 RUN echo 'export TERM=xterm-256color' >> /home/${SYSTEM_USER}/.bashrc
 
@@ -72,7 +78,6 @@ USER ${SYSTEM_USER}
 
 RUN pipx install maigret && \
     pipx install ghunt
-
 # RUN pipx install sherlock-project
 # RUN pipx install holehe
 # RUN pipx install theHarvester
@@ -102,7 +107,6 @@ USER root
 #     cd /opt/ferramenta && pip3 install -r requirements.txt
 
 # =========================================================
-
 RUN mkdir /var/run/sshd
 
 # ---- MOTD customizado ----
@@ -110,5 +114,4 @@ RUN chmod -x /etc/update-motd.d/* 2>/dev/null || true
 COPY motd /etc/motd
 
 EXPOSE 22
-
 CMD ["/usr/sbin/sshd", "-D"]
