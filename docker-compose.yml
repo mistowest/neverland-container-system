@@ -6,18 +6,22 @@ services:
         SYSTEM_USER: ${SYSTEM_USER}
         SYSTEM_PASSWORD: ${SYSTEM_PASSWORD}
         SYSTEM_HOSTNAME: ${SYSTEM_HOSTNAME}
-        SYSTEM_UID: ${SYSTEM_UID:-}
-        SYSTEM_GID: ${SYSTEM_GID:-}
+
     container_name: ubuntu-${SYSTEM_USER}
-    restart: unless-stopped
+
     hostname: ${SYSTEM_HOSTNAME}
+
+    restart: unless-stopped
+
     tty: true
     stdin_open: true
+
     ports:
       - "${SSH_PORT}:22"
+
     volumes:
       - ubuntu_data:/home/${SYSTEM_USER}
-      - ./data:/home/${SYSTEM_USER}/data
+
     mem_limit: ${MEM_LIMIT}
     mem_swappiness: 0
     memswap_limit: ${MEM_SWAP_LIMIT}
