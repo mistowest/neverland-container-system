@@ -6,7 +6,7 @@
 
 ## O que é isso
 
-O **neverland-container-system** provisiona um container Ubuntu dedicado e persistente, acessível via SSH ou `docker exec`, que serve como estação de trabalho isolada para atividades investigativas.
+O **mister-container-system** provisiona um container Ubuntu dedicado e persistente, acessível via SSH ou `docker exec`, que serve como estação de trabalho isolada para atividades investigativas.
 
 O ambiente é separado do sistema host por design: bibliotecas, ferramentas e dados sensíveis ficam confinados ao container e ao seu volume Docker, sem interferir no restante do sistema.
 
